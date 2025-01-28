@@ -17,10 +17,26 @@ permissions:
    contents: read
 
 jobs:
+  build-linux:
+    name: build toolchain for ${{ matrix.config.os }}/${{ matrix.config.arch }}
+    runs-on: ubuntu-22.04-${{ matrix.config.arch }}
 
-  linux-arm64-build-base:
-    name: build base image for linux/arm64
-    runs-on: ubuntu-24.04-arm
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+        - {
+            os: linux,
+            arch: arm64
+          }
+        - {
+            os: ubuntu-22.04,
+            arch: arm64
+          }
+
+    env:
+      IMAGE_NAME: flipperzero-toolchain-${{ matrix.config.os }}
+      IMAGE_ARCH: ${{ matrix.config.arch }}
 
     steps:
       - name: 'checkout code'
@@ -29,121 +45,33 @@ jobs:
           fetch-depth: 1
           ref: ${{ github.event.pull_request.head.sha }}
 
-      - name: 'generate metadata'
-        id: meta
-        env:
-          IMAGE_NAME: flipperzero-toolchain-linux-build-base
+      - name: 'Set image tag and name'
+        id: tag
         run: |
-            IMAGE_TAG="${IMAGE_NAME}"
-            echo "tags=${IMAGE_TAG}" >> "$GITHUB_OUTPUT"
+          IMAGE_TAG="0"
+          if [[ "${{ github.ref }}" == "refs/tags/"* ]]; then
+            REF=${{ github.ref }};
+            TAG_FULL=${REF#refs/*/};
+            IMAGE_TAG=${TAG_FULL//\//_};
+          fi
+          echo "IMAGE_TAG=${IMAGE_TAG}" >> $GITHUB_ENV
+          echo "image_tag=${IMAGE_TAG}" >> $GITHUB_OUTPUT
+  
+      - name: setup docker buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: merge dockerfiles
+        run: |
+          cat ./linux/Dockerfile.* > ./linux/Dockerfile
 
       - name: build and export base_build image
         id: docker_build
         uses: docker/build-push-action@v6
         with:
-          file: ./linux/Dockerfile.step1.build-base
+          file: ./linux/Dockerfile
           context: ./linux/
-          tags: flipperzero-toolchain-linux-build-base:latest
-          outputs: type=docker,dest=${{ runner.temp }}/flipperzero-toolchain-linux-build-base_latest.tar
-          cache-from: type=gha,scope=flipperzero-toolchain-linux-arm64-cache
-          cache-to: type=gha,mode=max,scope=flipperzero-toolchain-linux-arm64-cache
-
-      - name: upload artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: flipperzero-toolchain-linux-build-base_latest
-          path: ${{ runner.temp }}/flipperzero-toolchain-linux-build-base_latest.tar
-
-  linux-arm64-build-components:
-    name: build ${{ matrix.component }}
-    needs: [linux-arm64-build-base]
-    runs-on: ubuntu-24.04-arm
-
-    strategy:
-      fail-fast: false
-      matrix:
-        component:
-          - binutils
-          - gcc
-          - llvm
-          - python-with-gdb
-          - tools
-
-    steps:
-      - name: 'checkout code'
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
-          ref: ${{ github.event.pull_request.head.sha }}
-
-      - name: 'generate metadata'
-        id: meta
-        run: |
-            echo "tags=flipperzero-toolchain-linux-${{ matrix.component }}" >> "$GITHUB_OUTPUT"
-
-      - name: download artifacts
-        uses: actions/download-artifact@v4
-        with: 
-          name: flipperzero-toolchain-linux-build-base_latest
-          path: ${{ runner.temp }}
-
-      - name: load image
-        run: | 
-          docker load --input ${{ runner.temp }}/flipperzero-toolchain-linux-build-base_latest.tar
-
-      - name: build ${{ matrix.component }} container
-        uses: docker/build-push-action@v6
-        with:
-          file: ./linux/Dockerfile.step2.${{ matrix.component }}
-          context: ./linux/
+          tags: ${IMAGE_NAME}:${IMAGE_TAG}
           load: true
-          tags: flipperzero-toolchain-linux-${{ matrix.component }}
-          outputs: type=docker,dest=${{ runner.temp }}/flipperzero-toolchain-linux-${{ matrix.component }}_latest.tar
-          cache-from: type=gha,scope=flipperzero-toolchain-linux-arm64-cache
-          cache-to: type=gha,mode=max,scope=flipperzero-toolchain-linux-arm64-cache
-
-      - name: uplaod artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: flipperzero-toolchain-linux-${{ matrix.component }}_latest
-          path: ${{ runner.temp }}/flipperzero-toolchain-linux-${{ matrix.component }}_latest.tar
-  
-  
-  linux-arm64-final:
-    name: build final image for linux/arm64
-    needs: [linux-arm64-build-base, linux-arm64-build-components]
-    runs-on: ubuntu-24.04-arm
-
-    steps:
-      - name: 'checkout code'
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
-          ref: ${{ github.event.pull_request.head.sha }}
-
-
-      - name: download artifacts
-        uses: actions/download-artifact@v4
-        with: 
-          pattern: flipperzero-toolchain-linux-*_latest
-          path: ${{ runner.temp }}
-          merge-multiple: true 
-
-      - name: load image
-        run: | 
-          docker load --input ${{ runner.temp }}/flipperzero-toolchain-linux-binutils_latest.tar
-          docker load --input ${{ runner.temp }}/flipperzero-toolchain-linux-gcc_latest.tar
-          docker load --input ${{ runner.temp }}/flipperzero-toolchain-linux-llvm_latest.tar
-          docker load --input ${{ runner.temp }}/flipperzero-toolchain-linux-python-with-gdb_latest.tar
-          docker load --input ${{ runner.temp }}/flipperzero-toolchain-linux-tools_latest.tar
-      
-      - name: build base_build container
-        id: docker_build
-        uses: docker/build-push-action@v6
-        with:
-          file: ./linux/Dockerfile.step3.final
-          context: ./linux/
-          load: true
-          tags: flipperzero-toolchain-linux
-          cache-from: type=gha,scope=flipperzero-toolchain-linux-arm64-cache
-          cache-to: type=gha,mode=max,scope=flipperzero-toolchain-linux-arm64-cache
+          outputs: type=docker,dest=${{ runner.temp }}/${IMAGE_NAME}_${IMAGE_TAG}_${IMAGE_ARCH}.tar
+          cache-from: type=gha,scope=${IMAGE_NAME}_${IMAGE_TAG}_${IMAGE_ARCH}
+          cache-to: type=gha,mode=max,scope=${IMAGE_NAME}_${IMAGE_TAG}_${IMAGE_ARCH}
