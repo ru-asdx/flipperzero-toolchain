@@ -27,11 +27,11 @@ jobs:
         config:
         - {
             arch: arm64,
-            runner_os: ubuntu-24.04-arm64
+            runner_os:  ubuntu-24.04-arm
           }
         - {
             arch: amd64,
-            runner_os: ubuntu-24.04-amd64
+            runner_os: ubuntu-24.04
           }
 
     env:
