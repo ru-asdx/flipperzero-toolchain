@@ -9,7 +9,7 @@ WORKDIR /toolchain
 ENV DEBIAN_FRONTEND=noninteractive
 
 COPY --from=flipperzero-toolchain-linux-binutils /toolchain/linux-output-root /toolchain/linux-output-root
-COPY --from=flipperzero-toolchain-linux-gdb /toolchain/linux-output-root /toolchain/linux-output-root
+COPY --from=flipperzero-toolchain-linux-python-with-gdb /toolchain/linux-output-root /toolchain/linux-output-root
 COPY --from=flipperzero-toolchain-linux-gcc /toolchain/linux-output-root /toolchain/linux-output-root
 COPY --from=flipperzero-toolchain-linux-tools /toolchain/linux-output-root /toolchain/linux-output-root
 COPY --from=flipperzero-toolchain-linux-llvm /toolchain/linux-output-root /toolchain/linux-output-root

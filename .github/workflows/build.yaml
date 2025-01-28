@@ -18,18 +18,9 @@ permissions:
 
 jobs:
 
-  build_base:
-    name: build base
+  linux-arm64-build-base:
+    name: build base image for linux/arm64
     runs-on: ubuntu-24.04-arm
-
-    permissions:
-      contents: read
-
-    strategy:
-      matrix:
-        platform:
-          - linux/amd64
-          - linux/arm64
 
     steps:
       - name: 'checkout code'
@@ -42,67 +33,12 @@ jobs:
         id: meta
         env:
           IMAGE_NAME: flipperzero-toolchain-linux-build-base
-
         run: |
             IMAGE_TAG="${IMAGE_NAME}"
-
-            cache_from=()
-            cache_to=()
-
-            cache_from+=("type=gha,scope=${IMAGE_TAG}")
-            cache_to+=("type=gha,mode=max,scope=${IMAGE_TAG}")
-
-            echo "::group::Cache from data"
-            echo "${cache_from[*]}"
-            echo "::endgroup::"
-
-            echo "::group::Cache to data"
-            echo "${cache_to[*]}"
-            echo "::endgroup::"
-
-            cache_from=$(printf '%s\n' "${cache_from[@]}")
-            cache_to=$(printf '%s\n' "${cache_to[@]}")
-
-            echo 'cache_from<<EOF' >> "$GITHUB_OUTPUT"
-            echo "$cache_from" >> "$GITHUB_OUTPUT"
-            echo 'EOF' >> "$GITHUB_OUTPUT"
-            echo 'cache_to<<EOF' >> "$GITHUB_OUTPUT"
-            echo "$cache_to" >> "$GITHUB_OUTPUT"
-            echo 'EOF' >> "$GITHUB_OUTPUT"
-
             echo "tags=${IMAGE_TAG}" >> "$GITHUB_OUTPUT"
-
-#      - name: setup docker
-#        run: | 
-#            brew install --cask docker 
-#            docker version || true
-#            open /Applications/Docker.app
-#            #brew install docker-buildx
-#            #curl -LO https://github.com/docker/buildx/releases/download/v0.20.1/buildx-v0.20.1.darwin-arm64
-#            #mkdir -p ~/.docker/cli-plugins
-#            #ln -sfn $(which docker-buildx) ~/.docker/cli-plugins/docker-buildx
-#            #ln -s $(docker context inspect --format '{{ .Endpoints.docker.Host }}') /var/run/docker.sock
-#            #mv buildx-v0.20.1.darwin-arm64 ~/.docker/cli-plugins/docker-buildx
-#            #chmod +x ~/.docker/cli-plugins/docker-buildx
-#            #docker --version || true
-#            #docker --help || true
-#            #docker buildx version || true
-#
-#      - name: get endpoint
-#        id: get_endpoint
-#        run: |
-#            docker context inspect --format '{{ .Endpoints.docker.Host }}' || true
-#            ENDPOINT=$(docker context inspect --format '{{ .Endpoints.docker.Host }}')
-#            echo "endpoint=${ENDPOINT}" >> "$GITHUB_OUTPUT"
-
-      - name: setup qemu
-        uses: docker/setup-qemu-action@v3
-        with:
-          platforms: all
 
       - name: setup docker buildx
         uses: docker/setup-buildx-action@v3
-
 
       - name: build base_build container
         id: docker_build
@@ -111,6 +47,70 @@ jobs:
           file: ./linux/Dockerfile.step1.build-base
           context: ./linux/
           tags: ${{ steps.meta.output.tags }}
-          platforms: ${{ matrix.platform }}
-          cache-from: ${{ steps.meta.outputs.cache_from }}
-          cache-to: ${{ steps.meta.outputs.cache_to }}
+          cache-from: type=gha,scope=flipperzero-toolchain-linux-arm64-cache
+          cache-to: type=gha,mode=max,scope=flipperzero-toolchain-linux-arm64-cache
+
+  linux-arm64-build-components:
+    name: build ${{ matrix.component }}
+    needs: [linux-arm64-build-base]
+    runs-on: ubuntu-24.04-arm
+
+    strategy:
+      fail-fast: false
+      matrix:
+        component:
+          - binutils
+          - gcc
+          - llvm
+          - python-with-gdb
+          - tools
+
+    steps:
+      - name: 'checkout code'
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          ref: ${{ github.event.pull_request.head.sha }}
+      
+      - name: 'generate metadata'
+        id: meta
+        run: |
+            echo "tags=flipperzero-toolchain-linux-${{ matrix.component }}" >> "$GITHUB_OUTPUT"
+
+      - name: setup docker buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: build base_build container
+        uses: docker/build-push-action@v6
+        with:
+          file: ./linux/Dockerfile.step2.${{ matrix.component }}
+          context: ./linux/
+          tags: ${{ steps.meta.output.tags }}
+          cache-from: type=gha,scope=flipperzero-toolchain-linux-arm64-cache
+          cache-to: type=gha,mode=max,scope=flipperzero-toolchain-linux-arm64-cache
+  
+  linux-arm64-final:
+    name: build final image for linux/arm64
+    needs: [linux-arm64-build-base, linux-arm64-build-components]
+    runs-on: ubuntu-24.04-arm
+
+    steps:
+      - name: 'checkout code'
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: setup docker buildx
+        uses: docker/setup-buildx-action@v3
+  
+      - name: build base_build container
+        id: docker_build
+        uses: docker/build-push-action@v6
+        with:
+          file: ./linux/Dockerfile.step3.final
+          context: ./linux/
+          load: true
+          tags: flipperzero-toolchain-linux
+          cache-from: type=gha,scope=flipperzero-toolchain-linux-arm64-cache
+          cache-to: type=gha,mode=max,scope=flipperzero-toolchain-linux-arm64-cache

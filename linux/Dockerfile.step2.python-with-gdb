@@ -4,3 +4,11 @@
 ##
 FROM flipperzero-toolchain-linux-build-base AS flipperzero-toolchain-linux-python
 RUN /toolchain/src/build-linux-python.sh python
+
+##
+## flipperzero-toolchain-linux-gdb
+##
+FROM flipperzero-toolchain-linux-python AS flipperzero-toolchain-linux-python-with-gdb
+ADD scripts/build-linux-gdb.sh /toolchain/src/
+
+RUN /toolchain/src/build-linux-gdb.sh
