@@ -75,6 +75,8 @@ jobs:
       - name: setup docker
         run: | 
             brew install --cask docker 
+            docker version || true
+            open /Applications/Docker.app
             #brew install docker-buildx
             #curl -LO https://github.com/docker/buildx/releases/download/v0.20.1/buildx-v0.20.1.darwin-arm64
             #mkdir -p ~/.docker/cli-plugins
@@ -89,6 +91,7 @@ jobs:
       - name: get endpoint
         id: get_endpoint
         run: |
+            docker context inspect --format '{{ .Endpoints.docker.Host }}' || true
             ENDPOINT=$(docker context inspect --format '{{ .Endpoints.docker.Host }}')
             echo "endpoint=${ENDPOINT}" >> "$GITHUB_OUTPUT"
 
