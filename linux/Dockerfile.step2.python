@@ -1,0 +1,6 @@
+##
+##  flipperzero-toolchain-linux-python-build-libs
+##  flipperzero-toolchain-linux-python
+##
+FROM flipperzero-toolchain-linux-build-base AS flipperzero-toolchain-linux-python
+RUN /toolchain/src/build-linux-python.sh python

@@ -1,0 +1,9 @@
+##
+## flipperzero-toolchain-linux-tools
+##
+FROM flipperzero-toolchain-linux-build-base AS flipperzero-toolchain-linux-tools
+RUN /toolchain/src/build-linux-flipper-tools.sh protobuf \
+    && /toolchain/src/build-linux-flipper-tools.sh libusb \
+    && /toolchain/src/build-linux-flipper-tools.sh libhidapi \
+    && /toolchain/src/build-linux-flipper-tools.sh openocd \
+    && /toolchain/src/build-linux-flipper-tools.sh doxygen

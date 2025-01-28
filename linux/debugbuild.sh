@@ -1,0 +1,19 @@
+#!/bin/bash
+
+cmd() {
+    echo "[#] $*" >&2
+#    "$@"
+}
+
+die() {
+    echo "[!] $*" >&2
+    exit 1
+}
+
+
+for i in Dockerfile.* ; do
+    buildname=$(cat $i | grep " AS flipperzero-toolchain" | head -n1 | awk -F' AS ' '{print $2}' )
+
+    DOCKER_BUILDKIT=1 cmd docker build -t ${buildname} -f $i .
+done;
+

@@ -1,0 +1,13 @@
+## (key for build.sh) --> FROM flipperzero-toolchain-linux-build-deps AS flipperzero-toolchain-linux-gcc
+##
+## flipperzero-toolchain-linux-newlib +
+## flipperzero-toolchain-linux-newlib-nano
+## flipperzero-toolchain-linux-gcc
+## flipperzero-toolchain-linux-gcc-nano
+##
+
+FROM flipperzero-toolchain-linux-build-base AS flipperzero-toolchain-linux-gcc
+RUN /toolchain/src/build-linux-gcc.sh gcc \
+    && /toolchain/src/build-linux-gcc.sh gcc-nano \
+    && /toolchain/src/build-linux-gcc.sh copy-libs \
+    && relink.sh /toolchain/linux-output-root

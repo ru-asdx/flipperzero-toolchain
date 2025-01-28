@@ -1,0 +1,7 @@
+name: 'Build toolchain'
+
+on:
+  push:
+    branches:
+      - 'asdx/**'
+
