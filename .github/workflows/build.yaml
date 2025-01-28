@@ -40,16 +40,22 @@ jobs:
       - name: setup docker buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: build base_build container
+      - name: build and export base_build image
         id: docker_build
         uses: docker/build-push-action@v6
         with:
           file: ./linux/Dockerfile.step1.build-base
           context: ./linux/
-          load: true
-          tags: ${{ steps.meta.output.tags }}
+          tags: flipperzero-toolchain-linux-build-base:latest
+          outputs: type=docker,dest=${{ runner.temp }}/flipperzero-toolchain-linux-build-base_latest.tar
           cache-from: type=gha,scope=flipperzero-toolchain-linux-arm64-cache
           cache-to: type=gha,mode=max,scope=flipperzero-toolchain-linux-arm64-cache
+
+      - name: upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: flipperzero-toolchain-linux-build-base_latest
+          path: ${{ runner.temp }}/flipperzero-toolchain-linux-build-base_latest.tar
 
   linux-arm64-build-components:
     name: build ${{ matrix.component }}
@@ -81,6 +87,16 @@ jobs:
       - name: setup docker buildx
         uses: docker/setup-buildx-action@v3
 
+      - name: download artifacts
+        uses: actions/download-artifact@v4
+        with: 
+          name: flipperzero-toolchain-linux-build-base_latest
+          path: ${{ runner.temp }}
+
+      - name: load image
+        run: | 
+          docker load --input ${{ runner.temp }}/flipperzero-toolchain-linux-build-base_latest.tar
+
       - name: build base_build container
         uses: docker/build-push-action@v6
         with:
@@ -88,8 +104,16 @@ jobs:
           context: ./linux/
           load: true
           tags: ${{ steps.meta.output.tags }}
+          outputs: type=docker,dest=${{ runner.temp }}/${{ steps.meta.output.tags }}_latest.tar
           cache-from: type=gha,scope=flipperzero-toolchain-linux-arm64-cache
           cache-to: type=gha,mode=max,scope=flipperzero-toolchain-linux-arm64-cache
+
+      - name: uplaod artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.meta.output.tags }}_latest
+          path: ${{ runner.temp }}/${{ steps.meta.output.tags }}_latest.tar
+  
   
   linux-arm64-final:
     name: build final image for linux/arm64
@@ -103,6 +127,22 @@ jobs:
           fetch-depth: 1
           ref: ${{ github.event.pull_request.head.sha }}
 
+
+      - name: download artifacts
+        uses: actions/download-artifact@v4
+        with: 
+          pattern: flipperzero-toolchain-linux-*_latest
+          path: ${{ runner.temp }}
+          merge-multiple: true 
+
+      - name: load image
+        run: | 
+          docker load --input ${{ runner.temp }}/flipperzero-toolchain-linux-binutils_latest.tar
+          docker load --input ${{ runner.temp }}/flipperzero-toolchain-linux-gcc_latest.tar
+          docker load --input ${{ runner.temp }}/flipperzero-toolchain-linux-llvm_latest.tar
+          docker load --input ${{ runner.temp }}/flipperzero-toolchain-linux-python-with-gdb_latest.tar
+          docker load --input ${{ runner.temp }}/flipperzero-toolchain-linux-tools_latest.tar
+      
       - name: setup docker buildx
         uses: docker/setup-buildx-action@v3
 
