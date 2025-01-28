@@ -83,8 +83,8 @@ jobs:
         id: docker_build
         uses: docker/build-push-action@v6
         with:
-          file: Dockerfile.step1.build-base
-          context: linux/
+          file: ./linux/Dockerfile.step1.build-base
+          context: ./linux/
           tags: ${{ steps.meta.output.tags }}
           platforms: ${{ matrix.platform }}
           cache-from: ${{ steps.meta.outputs.cache_from }}
