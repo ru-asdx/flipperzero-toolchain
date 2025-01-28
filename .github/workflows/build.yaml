@@ -74,9 +74,10 @@ jobs:
 
       - name: setup docker
         run: | 
-            brew install --cask docker
+            brew install docker docker-buildx colima
             docker --version || true
             docker --help || true
+            colima start
 
 
 #      - name: setup qemu
