@@ -1,4 +1,3 @@
-## (key for build.sh) --> FROM flipperzero-toolchain-linux-build-deps AS flipperzero-toolchain-linux-gcc
 ##
 ## flipperzero-toolchain-linux-newlib +
 ## flipperzero-toolchain-linux-newlib-nano

@@ -1,5 +1,5 @@
 ##
 ## flipperzero-toolchain-linux-binutils
-## build-time: 30s
+##
 FROM flipperzero-toolchain-linux-build-base AS flipperzero-toolchain-linux-binutils
 RUN /toolchain/src/build-linux-binutils.sh

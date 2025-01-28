@@ -18,24 +18,24 @@ permissions:
 
 jobs:
   build-linux:
-    name: build toolchain for ${{ matrix.config.os }}/${{ matrix.config.arch }}
-    runs-on: ubuntu-22.04-${{ matrix.config.arch }}
+    name: build toolchain for linux/${{ matrix.config.arch }}
+    runs-on: ${{ matrix.config.runner_os }}
 
     strategy:
       fail-fast: false
       matrix:
         config:
         - {
-            os: linux,
-            arch: arm64
+            arch: arm64,
+            runner_os: ubuntu-24.04-arm64
           }
         - {
-            os: ubuntu-22.04,
-            arch: arm64
+            arch: amd64,
+            runner_os: ubuntu-24.04-amd64
           }
 
     env:
-      IMAGE_NAME: flipperzero-toolchain-${{ matrix.config.os }}
+      IMAGE_NAME: flipperzero-toolchain-linux
       IMAGE_ARCH: ${{ matrix.config.arch }}
 
     steps:
