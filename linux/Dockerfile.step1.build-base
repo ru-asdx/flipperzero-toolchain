@@ -4,6 +4,9 @@
 FROM debian:11 AS flipperzero-toolchain-linux-build-base
 
 ARG TARGETPLATFORM
+ARG BUILDPLATFORM
+
+RUN echo "Building on $BUILDPLATFORM, targeting $TARGETPLATFORM"
 
 WORKDIR /toolchain/src/src/archives
 
@@ -113,6 +116,6 @@ ADD patch/gdb_curses.h /toolchain/src/src/gdb/gdb/
 RUN ln -s /toolchain/src/relink.sh /usr/local/bin/relink.sh \
     && /toolchain/src/build-linux-gcc.sh gcc-libs \
     && find /toolchain/src/src/archives/ -type f -delete \
-    && /toolchain/src/build-linux-python.sh python-libs \
+    && /toolchain/src/build-linux-python.sh python-libs
 
 WORKDIR /toolchain/src
