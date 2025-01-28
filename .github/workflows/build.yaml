@@ -82,14 +82,11 @@ jobs:
 
       - name: build base_build container
         id: docker_build
-        uses:  docker/build-push-action@v6
-        context: linux/
-        file: Dockerfile.step1.build-base
-        platforms: ${{ matrix.platform }}
-        tags: ${{ steps.meta.output.tags }}
-        cache-from: ${{ steps.meta.outputs.cache_from }}
-        cache-to: ${{ steps.meta.outputs.cache_to }}
-
-
-
-    
+        uses: docker/build-push-action@v6
+        with:
+          context: linux/
+          file: Dockerfile.step1.build-base
+          platforms: ${{ matrix.platform }}
+          tags: ${{ steps.meta.output.tags }}
+          cache-from: ${{ steps.meta.outputs.cache_from }}
+          cache-to: ${{ steps.meta.outputs.cache_to }}
