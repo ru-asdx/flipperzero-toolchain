@@ -100,7 +100,7 @@ jobs:
       - name: setup docker buildx
         uses: docker/setup-buildx-action@v3
         with:
-          endpoint: ${{ steps.get_endpoint.endpoint }}
+          endpoint: "unix:///Users/runner/.docker/run/docker.sock"
 
 
       - name: build base_build container
