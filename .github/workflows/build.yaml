@@ -32,6 +32,11 @@ jobs:
           - linux/arm64
 
     steps:
+      - name: Prepare
+        run: |
+            platform=${{ matrix.platform }}
+            echo "PLATFORM_PAIR=${platform//\//-}" >> $GITHUB_ENV
+
       - name: 'checkout code'
         uses: actions/checkout@v4
         with:
@@ -84,9 +89,9 @@ jobs:
         id: docker_build
         uses: docker/build-push-action@v6
         with:
+          platforms: ${{ matrix.platform }}
           context: linux/
           file: Dockerfile.step1.build-base
-          platforms: ${{ matrix.platform }}
           tags: ${{ steps.meta.output.tags }}
           cache-from: ${{ steps.meta.outputs.cache_from }}
           cache-to: ${{ steps.meta.outputs.cache_to }}
