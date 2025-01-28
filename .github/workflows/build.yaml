@@ -74,10 +74,16 @@ jobs:
 
       - name: setup docker
         run: | 
-            brew install docker docker-buildx colima
+            brew install --cask docker 
+            brew install docker-buildx
+            #curl -LO https://github.com/docker/buildx/releases/download/v0.20.1/buildx-v0.20.1.darwin-arm64
+            mkdir -p ~/.docker/cli-plugins
+            ln -sfn $(which docker-buildx) ~/.docker/cli-plugins/docker-buildx
+            #mv buildx-v0.20.1.darwin-arm64 ~/.docker/cli-plugins/docker-buildx
+            chmod +x ~/.docker/cli-plugins/docker-buildx
             docker --version || true
             docker --help || true
-            colima start
+            docker buildx version || true
 
 
 #      - name: setup qemu
