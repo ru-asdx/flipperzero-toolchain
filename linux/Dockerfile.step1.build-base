@@ -1,7 +1,7 @@
 ##
 ## flipperzero-toolchain-linux-src +
 ##
-FROM debian:12 AS flipperzero-toolchain-linux-build-base
+FROM debian:11 AS flipperzero-toolchain-linux-build-base
 
 ARG TARGETPLATFORM
 
