@@ -74,16 +74,18 @@ jobs:
 
       - name: setup docker
         run: | 
-            brew install --cask docker docker-buildx
+            brew install --cask docker
+            brew install docker-buildx
             docker buildx ls
+
 
 #      - name: setup qemu
 #        uses: docker/setup-qemu-action@v3
 #        with:
 #          platforms: all
 
-#      - name: setup docker buildx
-#        uses: docker/setup-buildx-action@v3
+      - name: setup docker buildx
+        uses: docker/setup-buildx-action@v3
 
       - name: build base_build container
         id: docker_build
