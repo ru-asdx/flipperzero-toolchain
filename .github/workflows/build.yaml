@@ -72,10 +72,10 @@ jobs:
 
             echo "tags=${IMAGE_TAG}" >> "$GITHUB_OUTPUT"
 
-      - name: install docker
+      - name: setup docker
         run: | 
-            brew install docker docker-buildx
-            colima start
+            brew install --cask docker
+            docker buildx ls
 
 #      - name: setup qemu
 #        uses: docker/setup-qemu-action@v3
