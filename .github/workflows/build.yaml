@@ -86,6 +86,11 @@ jobs:
             #docker --help || true
             #docker buildx version || true
 
+       - name: get endpoint
+         id: get_endpoint
+         run: |
+            ENDPOINT=$(docker context inspect --format '{{ .Endpoints.docker.Host }}')
+            echo "endpoint=${ENDPOINT}" >> "$GITHUB_OUTPUT"
 
 #      - name: setup qemu
 #        uses: docker/setup-qemu-action@v3
@@ -94,6 +99,8 @@ jobs:
 
       - name: setup docker buildx
         uses: docker/setup-buildx-action@v3
+        with:
+          endpoint: ${{ steps.get_endpoint.endpoint }}
 
 
       - name: build base_build container
