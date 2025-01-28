@@ -101,7 +101,10 @@ RUN case ${TARGETPLATFORM} in \
     && git clone https://github.com/flipperdevices/openocd.git /toolchain/src/src/openocd \
     && cd /toolchain/src/src/openocd \
     && git reset --hard 2c984ce7ce8e0c88894d9e40924fe9bcc052878e \
+    && sed -i 's/https\:\/\/git.savannah.nongnu.org\/git\/git2cl.git/git:\/\/repo.or.cz\/git2cl.git/g' /toolchain/src/src/openocd/.gitmodules \
     && git submodule update --init --recursive
+
+### savannah.nongnu.org often gives back error 502, which breaks the build. so we take the source from the developer repo.
 
 #
 # from gdb
