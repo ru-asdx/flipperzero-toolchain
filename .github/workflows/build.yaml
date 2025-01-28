@@ -20,7 +20,7 @@ jobs:
 
   build_base:
     name: build base
-    runs-on: macos-latest
+    runs-on: ubuntu-24.04-arm
 
     permissions:
       contents: read
@@ -72,38 +72,36 @@ jobs:
 
             echo "tags=${IMAGE_TAG}" >> "$GITHUB_OUTPUT"
 
-      - name: setup docker
-        run: | 
-            brew install --cask docker 
-            docker version || true
-            open /Applications/Docker.app
-            #brew install docker-buildx
-            #curl -LO https://github.com/docker/buildx/releases/download/v0.20.1/buildx-v0.20.1.darwin-arm64
-            #mkdir -p ~/.docker/cli-plugins
-            #ln -sfn $(which docker-buildx) ~/.docker/cli-plugins/docker-buildx
-            #ln -s $(docker context inspect --format '{{ .Endpoints.docker.Host }}') /var/run/docker.sock
-            #mv buildx-v0.20.1.darwin-arm64 ~/.docker/cli-plugins/docker-buildx
-            #chmod +x ~/.docker/cli-plugins/docker-buildx
-            #docker --version || true
-            #docker --help || true
-            #docker buildx version || true
+#      - name: setup docker
+#        run: | 
+#            brew install --cask docker 
+#            docker version || true
+#            open /Applications/Docker.app
+#            #brew install docker-buildx
+#            #curl -LO https://github.com/docker/buildx/releases/download/v0.20.1/buildx-v0.20.1.darwin-arm64
+#            #mkdir -p ~/.docker/cli-plugins
+#            #ln -sfn $(which docker-buildx) ~/.docker/cli-plugins/docker-buildx
+#            #ln -s $(docker context inspect --format '{{ .Endpoints.docker.Host }}') /var/run/docker.sock
+#            #mv buildx-v0.20.1.darwin-arm64 ~/.docker/cli-plugins/docker-buildx
+#            #chmod +x ~/.docker/cli-plugins/docker-buildx
+#            #docker --version || true
+#            #docker --help || true
+#            #docker buildx version || true
+#
+#      - name: get endpoint
+#        id: get_endpoint
+#        run: |
+#            docker context inspect --format '{{ .Endpoints.docker.Host }}' || true
+#            ENDPOINT=$(docker context inspect --format '{{ .Endpoints.docker.Host }}')
+#            echo "endpoint=${ENDPOINT}" >> "$GITHUB_OUTPUT"
 
-      - name: get endpoint
-        id: get_endpoint
-        run: |
-            docker context inspect --format '{{ .Endpoints.docker.Host }}' || true
-            ENDPOINT=$(docker context inspect --format '{{ .Endpoints.docker.Host }}')
-            echo "endpoint=${ENDPOINT}" >> "$GITHUB_OUTPUT"
-
-#      - name: setup qemu
-#        uses: docker/setup-qemu-action@v3
-#        with:
-#          platforms: all
+      - name: setup qemu
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: all
 
       - name: setup docker buildx
         uses: docker/setup-buildx-action@v3
-        with:
-          endpoint: "unix:///Users/runner/.docker/run/docker.sock"
 
 
       - name: build base_build container
