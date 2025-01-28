@@ -72,6 +72,9 @@ jobs:
 
             echo "tags=${IMAGE_TAG}" >> "$GITHUB_OUTPUT"
 
+      - name: install docker
+        run: | 
+            brew install docker
 
       - name: setup qemu
         uses: docker/setup-qemu-action@v3
