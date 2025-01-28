@@ -86,9 +86,9 @@ jobs:
             #docker --help || true
             #docker buildx version || true
 
-       - name: get endpoint
-         id: get_endpoint
-         run: |
+      - name: get endpoint
+        id: get_endpoint
+        run: |
             ENDPOINT=$(docker context inspect --format '{{ .Endpoints.docker.Host }}')
             echo "endpoint=${ENDPOINT}" >> "$GITHUB_OUTPUT"
 
