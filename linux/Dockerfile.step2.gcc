@@ -18,10 +18,12 @@ RUN . /toolchain/src/buildvars.sh \
     && find /toolchain/src/src/archives/ -type f -delete \
     && echo "[!] Build..." \
     && /toolchain/src/build-linux-gcc.sh gcc \
+        && rm -rf $LINUX_CONFIGURE_ROOT/newlib \
+        && rm -rf $LINUX_CONFIGURE_ROOT/gcc \
+        && rm -rf /toolchain/newlib-root \
     && /toolchain/src/build-linux-gcc.sh gcc-nano \
     && /toolchain/src/build-linux-gcc.sh copy-libs \
+        && rm -rf "/toolchain/src/src/arm-gnu-toolchain-12.2.rel1-${ARCH_TARGET}-arm-none-eabi" \
+        && rm -rf /toolchain/newlib-root-nano \
     && relink.sh /toolchain/linux-output-root \
-    && rm -rf "/toolchain/src/src/arm-gnu-toolchain-12.2.rel1-${ARCH_TARGET}-arm-none-eabi" \
-    && rm -rf /toolchain/newlib-root \
-    && rm -rf /toolchain/newlib-root-nano \
     && cleanup_after_build
