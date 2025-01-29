@@ -56,6 +56,4 @@ RUN wget -q "https://developer.arm.com/-/media/Files/downloads/gnu/12.3.rel1/src
     && find /toolchain/src/src/archives/ -type f -delete \
     && ln -s /toolchain/src/relink.sh /usr/local/bin/relink.sh \
     && /toolchain/src/build-linux-gcc.sh gcc-libs \
-    && . /toolchain/src/buildvars.sh \
-    && rm -rf ${LINUX_CONFIGURE_ROOT}/* \
-    && rm -rf ${LINUX_BUILD_ROOT}/*
+    && . /toolchain/src/buildvars.sh
