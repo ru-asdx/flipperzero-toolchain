@@ -39,6 +39,19 @@ jobs:
       IMAGE_ARCH: ${{ matrix.config.arch }}
 
     steps:
+      - name: free a little hdd space
+        run: |
+          df -h
+          sudo rm -rf /usr/local/share/chromium || true
+          sudo rm -rf /usr/local/share/powershell || true
+          sudo rm -rf /usr/local/lib/android || true
+          sudo rm -rf /opt/hostedtoolcache/CodeQL  || true
+          sudo rm -rf /opt/hostedtoolcache/Python || true
+          sudo rm -rf /opt/hostedtoolcache/go || true
+          sudo rm -rf /opt/hostedtoolcache/node || true
+          sudo apt purge -y firefox google-chrome-stable microsoft-edge-stable 
+          df -h 
+
       - name: 'checkout code'
         uses: actions/checkout@v4
         with:
@@ -66,34 +79,14 @@ jobs:
         run: |
           cat ./linux/Dockerfile.* > ./linux/Dockerfile
 
-      - name: check free space
-        run: |
-            echo "::group::/usr/local/bin/"
-            du -hsc /usr/local/bin/*
-            echo "::endgroup::"
-
-            echo "::group:://usr/local/share"
-            du -hsc /usr/local/share/*
-            echo "::endgroup::"
-
-            echo "::group::/usr/local/lib/"
-            du -hsc /usr/local/lib/*
-            echo "::endgroup::"
-
-            echo "::group::/opt/hostedtoolcache/"
-            du -hsc /opt/hostedtoolcache/*
-            echo "::endgroup::"
-
-
-
-#      - name: build and export base_build image
-#        id: docker_build
-#        uses: docker/build-push-action@v6
-#        with:
-#          file: ./linux/Dockerfile
-#          context: ./linux/
-#          tags: ${{ steps.meta.outputs.image_name }}:${{ steps.meta.outputs.image_tag }}
-#          load: true
-#          outputs: type=docker,dest=${{ runner.temp }}/${{ steps.meta.outputs.image_name }}_${{ steps.meta.outputs.image_tag }}_${{ steps.meta.outputs.image_arch }}.tar
-#          cache-from: type=gha,scope=${{ steps.meta.outputs.image_name }}_${{ steps.meta.outputs.image_tag }}_${{ steps.meta.outputs.image_arch }}
-#          cache-to: type=gha,mode=max,scope=${{ steps.meta.outputs.image_name }}_${{ steps.meta.outputs.image_tag }}_${{ steps.meta.outputs.image_arch }}
+      - name: build and export base_build image
+        id: docker_build
+        uses: docker/build-push-action@v6
+        with:
+          file: ./linux/Dockerfile
+          context: ./linux/
+          tags: ${{ steps.meta.outputs.image_name }}:${{ steps.meta.outputs.image_tag }}
+          load: true
+          outputs: type=docker,dest=${{ runner.temp }}/${{ steps.meta.outputs.image_name }}_${{ steps.meta.outputs.image_tag }}_${{ steps.meta.outputs.image_arch }}.tar
+          cache-from: type=gha,scope=${{ steps.meta.outputs.image_name }}_${{ steps.meta.outputs.image_tag }}_${{ steps.meta.outputs.image_arch }}
+          cache-to: type=gha,mode=max,scope=${{ steps.meta.outputs.image_name }}_${{ steps.meta.outputs.image_tag }}_${{ steps.meta.outputs.image_arch }}
