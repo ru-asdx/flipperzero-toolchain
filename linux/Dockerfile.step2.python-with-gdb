@@ -2,13 +2,42 @@
 ##  flipperzero-toolchain-linux-python-build-libs
 ##  flipperzero-toolchain-linux-python
 ##
-FROM flipperzero-toolchain-linux-build-base AS flipperzero-toolchain-linux-python
-RUN /toolchain/src/build-linux-python.sh python
+FROM flipperzero-toolchain-linux-build-base AS flipperzero-toolchain-linux-python-with-gdb
 
-##
-## flipperzero-toolchain-linux-gdb
-##
-FROM flipperzero-toolchain-linux-python AS flipperzero-toolchain-linux-python-with-gdb
-ADD scripts/build-linux-gdb.sh /toolchain/src/
+ADD "https://www.python.org/ftp/python/3.11.9/Python-3.11.9.tgz" .
+ADD "https://www.openssl.org/source/openssl-1.1.1w.tar.gz" .
+ADD "https://github.com/libffi/libffi/releases/download/v3.4.4/libffi-3.4.4.tar.gz" .
+ADD "https://zlib.net/zlib-1.3.1.tar.gz" .
+ADD "https://ftp.gnu.org/gnu/readline/readline-8.1.tar.gz" .
+ADD "https://ftp.gnu.org/gnu/gdb/gdb-13.2.tar.gz" .
 
-RUN /toolchain/src/build-linux-gdb.sh
+#
+# python
+#
+RUN mkdir -p /toolchain/src/src/{python,openssl,libffi,zlib,readline} \
+    && tar --strip-component=1 -xvf Python-3.11.9.tgz -C /toolchain/src/src/python \
+    && tar --strip-component=1 -xvf openssl-1.1.1w.tar.gz -C /toolchain/src/src/openssl \
+    && tar --strip-component=1 -xvf libffi-3.4.4.tar.gz -C /toolchain/src/src/libffi \
+    && tar --strip-component=1 -xvf zlib-1.3.1.tar.gz -C /toolchain/src/src/zlib \
+    && tar --strip-component=1 -xvf readline-8.1.tar.gz -C /toolchain/src/src/readline
+
+#
+# from gdb
+#
+RUN mkdir -p /toolchain/src/src/gdb/ \
+    && tar  --strip-component=1 -xvf gdb-13.2.tar.gz -C /toolchain/src/src/gdb/
+
+ADD patch/gdb_curses.h /toolchain/src/src/gdb/gdb/
+
+#
+# remove archives
+#
+RUN find /toolchain/src/src/archives/ -type f -delete
+
+WORKDIR /toolchain/src
+
+RUN /toolchain/src/build-linux-python.sh python-libs \
+    && /toolchain/src/build-linux-python.sh python \
+    && /toolchain/src/build-linux-gdb.sh \
+    && . /toolchain/src/buildvars.sh \
+    && cleanup_after_build

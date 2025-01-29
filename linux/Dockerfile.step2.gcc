@@ -6,7 +6,22 @@
 ##
 
 FROM flipperzero-toolchain-linux-build-base AS flipperzero-toolchain-linux-gcc
-RUN /toolchain/src/build-linux-gcc.sh gcc \
+
+#
+# dl && unpack
+#
+RUN . /toolchain/src/buildvars.sh \
+    && wget -q "https://developer.arm.com/-/media/Files/downloads/gnu/12.2.rel1/binrel/arm-gnu-toolchain-12.2.rel1-${ARCH_TARGET}-arm-none-eabi.tar.xz" \
+    && tar -xvf arm-gnu-toolchain-12.2.rel1-${ARCH_TARGET}-arm-none-eabi.tar.xz -C /toolchain/src/src/ \
+    && rm -rf /usr/share/doc/gcc \
+    && cp -fr /toolchain/src/src/arm-gnu-toolchain-12.2.rel1-${ARCH_TARGET}-arm-none-eabi/* /usr/ \
+    && find /toolchain/src/src/archives/ -type f -delete \
+    && echo "[!] Build..." \
+    && /toolchain/src/build-linux-gcc.sh gcc \
     && /toolchain/src/build-linux-gcc.sh gcc-nano \
     && /toolchain/src/build-linux-gcc.sh copy-libs \
-    && relink.sh /toolchain/linux-output-root
+    && relink.sh /toolchain/linux-output-root \
+    && rm -rf "/toolchain/src/src/arm-gnu-toolchain-12.2.rel1-${ARCH_TARGET}-arm-none-eabi" \
+    && rm -rf /toolchain/newlib-root \
+    && rm -rf /toolchain/newlib-root-nano \
+    && cleanup_after_build

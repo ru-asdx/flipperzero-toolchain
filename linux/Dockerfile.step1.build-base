@@ -1,5 +1,6 @@
 ##
 ## flipperzero-toolchain-linux-src +
+## flipperzero-toolchain-linux-build-deps
 ##
 FROM debian:11 AS flipperzero-toolchain-linux-build-base
 
@@ -14,7 +15,9 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 RUN rm /bin/sh && ln -s /bin/bash /bin/sh \
     && apt update \
-    && apt -y install build-essential xz-utils m4 bison flex texinfo file patchelf rsync automake autoconf libtool python3 git pkg-config libudev-dev git wget git patch
+    && apt -y install build-essential xz-utils m4 bison flex texinfo file patchelf rsync automake autoconf libtool python3 git pkg-config libudev-dev git wget git patch \
+    && apt-get -y clean \
+    && rm -rf /tmp/* /var/tmp/*  /var/lib/apt/lists/*
 
 #
 # Add build scripts
@@ -22,103 +25,37 @@ RUN rm /bin/sh && ln -s /bin/bash /bin/sh \
 ADD scripts/ /toolchain/src/
 
 #
-# dl needful archives
+# dl var archives
 #
 RUN case ${TARGETPLATFORM} in \
          "linux/amd64")  ARCH=x86_64  ;; \
          "linux/arm64")  ARCH=aarch64  ;; \
     esac \
-    && echo "ARCH_TARGET=${ARCH}" >> /toolchain/src/buildvars.sh \
-    && wget -q "https://developer.arm.com/-/media/Files/downloads/gnu/12.2.rel1/binrel/arm-gnu-toolchain-12.2.rel1-${ARCH}-arm-none-eabi.tar.xz" \
-    && wget -q "https://github.com/Kitware/CMake/releases/download/v3.28.0/cmake-3.28.0-linux-${ARCH}.tar.gz"
+    && echo "ARCH_TARGET=${ARCH}" >> /toolchain/src/buildvars.sh
 
-ADD "https://developer.arm.com/-/media/Files/downloads/gnu/12.3.rel1/srcrel/arm-gnu-toolchain-src-snapshot-12.3.rel1.tar.xz" .
-ADD "https://ftp.gnu.org/pub/gnu/ncurses/ncurses-6.2.tar.gz" .
-ADD "https://www.python.org/ftp/python/3.11.9/Python-3.11.9.tgz" .
-ADD "https://www.openssl.org/source/openssl-1.1.1w.tar.gz" .
-ADD "https://github.com/libffi/libffi/releases/download/v3.4.4/libffi-3.4.4.tar.gz" .
-ADD "https://zlib.net/zlib-1.3.1.tar.gz" .
-ADD "https://ftp.gnu.org/gnu/readline/readline-8.1.tar.gz" .
-ADD "https://github.com/protocolbuffers/protobuf/releases/download/v21.7/protobuf-cpp-3.21.7.tar.gz" .
-ADD "https://github.com/llvm/llvm-project/releases/download/llvmorg-18.1.8/llvm-18.1.8.src.tar.xz" .
-ADD "https://github.com/llvm/llvm-project/releases/download/llvmorg-18.1.8/clang-18.1.8.src.tar.xz" .
-ADD "https://github.com/llvm/llvm-project/releases/download/llvmorg-18.1.8/cmake-18.1.8.src.tar.xz" .
-ADD "https://github.com/llvm/llvm-project/releases/download/llvmorg-18.1.8/third-party-18.1.8.src.tar.xz" .
-ADD "https://github.com/llvm/llvm-project/releases/download/llvmorg-18.1.8/clang-tools-extra-18.1.8.src.tar.xz" .
-ADD "https://github.com/libusb/libusb/releases/download/v1.0.24/libusb-1.0.24.tar.bz2" .
-ADD "https://github.com/libusb/hidapi/archive/refs/tags/hidapi-0.14.0.tar.gz" .
-ADD "https://github.com/doxygen/doxygen/releases/download/Release_1_12_0/doxygen-1.12.0.src.tar.gz" .
-ADD "https://ftp.gnu.org/gnu/gdb/gdb-13.2.tar.gz" .
+### src + build-deps
+
+RUN case ${TARGETPLATFORM} in \
+         "linux/amd64")  ARCH=x86_64  ;; \
+         "linux/arm64")  ARCH=aarch64  ;; \
+    esac \
+    && wget -q "https://github.com/Kitware/CMake/releases/download/v3.28.0/cmake-3.28.0-linux-${ARCH}.tar.gz" \
+    && tar -xvf cmake-3.28.0-linux-${ARCH}.tar.gz -C /tmp \
+    && rsync -azv /tmp/cmake-3.28.0-linux-${ARCH}/ /usr \
+    && rm cmake-3.28.0-linux-${ARCH}.tar.gz
 
 #
 # from src && deps
-#
-RUN tar -xvf arm-gnu-toolchain-src-snapshot-12.3.rel1.tar.xz -C /toolchain/src/src/ \
-    && rm -rf /toolchain/src/src/ncurses/* \
-    && tar --strip-component=1 -xvf ncurses-6.2.tar.gz -C /toolchain/src/src/ncurses
-
-#
-# from python-build-libs && python
-#
-RUN mkdir -p /toolchain/src/src/{python,openssl,libffi,zlib,readline} \
-    && tar --strip-component=1 -xvf Python-3.11.9.tgz -C /toolchain/src/src/python \
-    && tar --strip-component=1 -xvf openssl-1.1.1w.tar.gz -C /toolchain/src/src/openssl \
-    && tar --strip-component=1 -xvf libffi-3.4.4.tar.gz -C /toolchain/src/src/libffi \
-    && tar --strip-component=1 -xvf zlib-1.3.1.tar.gz -C /toolchain/src/src/zlib \
-    && tar --strip-component=1 -xvf readline-8.1.tar.gz -C /toolchain/src/src/readline
-
-#
-# from gcc
-#
-RUN case ${TARGETPLATFORM} in \
-         "linux/amd64")  ARCH=x86_64  ;; \
-         "linux/arm64")  ARCH=aarch64  ;; \
-    esac \
-    && tar -xvf arm-gnu-toolchain-12.2.rel1-${ARCH}-arm-none-eabi.tar.xz -C /toolchain/src/src/ \
-    && rm -rf /usr/share/doc/gcc \
-    && cp -fr /toolchain/src/src/arm-gnu-toolchain-12.2.rel1-${ARCH}-arm-none-eabi/* /usr/
-
-#
-# from tools
-#
-RUN case ${TARGETPLATFORM} in \
-         "linux/amd64")  ARCH=x86_64  ;; \
-         "linux/arm64")  ARCH=aarch64  ;; \
-    esac \
-    && tar -xvf cmake-3.28.0-linux-${ARCH}.tar.gz -C /tmp \
-    && rsync -azv /tmp/cmake-3.28.0-linux-${ARCH}/ /usr \
-    && mkdir -p /toolchain/src/src/llvm/{cmake,third-party,llvm-18.1.8.src/tools/clang/tools/extra} \
-    && mkdir -p /toolchain/src/src/{protobuf,libusb,hidapi,doxygen} \
-    && tar --strip-component=1 -xvf protobuf-cpp-3.21.7.tar.gz -C /toolchain/src/src/protobuf \
-    && tar -xvf llvm-18.1.8.src.tar.xz -C /toolchain/src/src/llvm \
-    && tar --strip-component=1 -xvf clang-18.1.8.src.tar.xz -C /toolchain/src/src/llvm/llvm-18.1.8.src/tools/clang \
-    && tar --strip-component=1 -xvf cmake-18.1.8.src.tar.xz -C /toolchain/src/src/llvm/cmake \
-    && tar --strip-component=1 -xvf third-party-18.1.8.src.tar.xz -C /toolchain/src/src/llvm/third-party \
-    && tar --strip-component=1 -xvf clang-tools-extra-18.1.8.src.tar.xz -C /toolchain/src/src/llvm/llvm-18.1.8.src/tools/clang/tools/extra \
-    && tar --strip-component=1 -xvf libusb-1.0.24.tar.bz2 -C /toolchain/src/src/libusb \
-    && tar --strip-component=1 -xvf hidapi-0.14.0.tar.gz -C /toolchain/src/src/hidapi \
-    && tar --strip-component=1 -xzf doxygen-1.12.0.src.tar.gz -C /toolchain/src/src/doxygen \
-    && git clone https://github.com/flipperdevices/openocd.git /toolchain/src/src/openocd \
-    && cd /toolchain/src/src/openocd \
-    && git reset --hard 2c984ce7ce8e0c88894d9e40924fe9bcc052878e \
-    && sed -i 's/https\:\/\/git.savannah.nongnu.org\/git\/git2cl.git/git:\/\/repo.or.cz\/git2cl.git/g' /toolchain/src/src/openocd/.gitmodules \
-    && git submodule update --init --recursive
-
-### savannah.nongnu.org often gives back error 502, which breaks the build. so we take the source from the developer repo.
-
-#
-# from gdb
-#
-RUN mkdir -p /toolchain/src/src/gdb/ \
-    && tar  --strip-component=1 -xvf gdb-13.2.tar.gz -C /toolchain/src/src/gdb/
-ADD patch/gdb_curses.h /toolchain/src/src/gdb/gdb/
-
-#
 # rm archives && build gcc-libs && build python-libs
 #
-RUN ln -s /toolchain/src/relink.sh /usr/local/bin/relink.sh \
-    && /toolchain/src/build-linux-gcc.sh gcc-libs \
+RUN wget -q "https://developer.arm.com/-/media/Files/downloads/gnu/12.3.rel1/srcrel/arm-gnu-toolchain-src-snapshot-12.3.rel1.tar.xz" \
+    && wget -q "https://ftp.gnu.org/pub/gnu/ncurses/ncurses-6.2.tar.gz" \
+    && tar -xvf arm-gnu-toolchain-src-snapshot-12.3.rel1.tar.xz -C /toolchain/src/src/ \
+    && rm -rf /toolchain/src/src/ncurses/* \
+    && tar --strip-component=1 -xvf ncurses-6.2.tar.gz -C /toolchain/src/src/ncurses \
     && find /toolchain/src/src/archives/ -type f -delete \
-    && /toolchain/src/build-linux-python.sh python-libs
-
-WORKDIR /toolchain/src
+    && ln -s /toolchain/src/relink.sh /usr/local/bin/relink.sh \
+    && /toolchain/src/build-linux-gcc.sh gcc-libs \
+    && . /toolchain/src/buildvars.sh \
+    && rm -rf ${LINUX_CONFIGURE_ROOT}/* \
+    && rm -rf ${LINUX_BUILD_ROOT}/*

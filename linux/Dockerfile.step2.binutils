@@ -2,4 +2,10 @@
 ## flipperzero-toolchain-linux-binutils
 ##
 FROM flipperzero-toolchain-linux-build-base AS flipperzero-toolchain-linux-binutils
-RUN /toolchain/src/build-linux-binutils.sh
+
+WORKDIR /toolchain/src
+
+RUN . /toolchain/src/buildvars.sh \
+    && /toolchain/src/build-linux-binutils.sh \
+    && cleanup_after_build
+

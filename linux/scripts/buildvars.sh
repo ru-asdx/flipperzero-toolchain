@@ -1,5 +1,13 @@
 #!/bin/bash
 
+LINUX_BUILD_ROOT=/toolchain/linux-build-root
+LINUX_OUTPUT_ROOT=/toolchain/linux-output-root
+LINUX_CONFIGURE_ROOT=/toolchain/linux-configure-root
+
+CMD=${1:-}
+
+CPUS=$(($(nproc) + 1))
+ARCH_BUILD=$(uname -m | sed 'y/XI/xi/')
 
 function cleanup_relink() {
     local DIRECTORY;
@@ -17,12 +25,8 @@ die() {
     exit 1
 }
 
-
-LINUX_BUILD_ROOT=/toolchain/linux-build-root
-LINUX_OUTPUT_ROOT=/toolchain/linux-output-root
-LINUX_CONFIGURE_ROOT=/toolchain/linux-configure-root
-
-CMD=${1:-}
-
-CPUS=$(($(nproc) + 1))
-ARCH_BUILD=$(uname -m | sed 'y/XI/xi/')
+cleanup_after_build() {
+    rm -rf "$LINUX_BUILD_ROOT"
+    rm -rf "$LINUX_CONFIGURE_ROOT"
+    rm -rf /toolchain/src
+}

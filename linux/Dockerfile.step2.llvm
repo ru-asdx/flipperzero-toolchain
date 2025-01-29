@@ -2,5 +2,30 @@
 ## flipperzero-toolchain-linux-tools
 ##
 FROM flipperzero-toolchain-linux-build-base AS flipperzero-toolchain-linux-llvm
-RUN /toolchain/src/build-linux-flipper-tools.sh llvm
 
+ADD "https://github.com/llvm/llvm-project/releases/download/llvmorg-18.1.8/llvm-18.1.8.src.tar.xz" .
+ADD "https://github.com/llvm/llvm-project/releases/download/llvmorg-18.1.8/clang-18.1.8.src.tar.xz" .
+ADD "https://github.com/llvm/llvm-project/releases/download/llvmorg-18.1.8/cmake-18.1.8.src.tar.xz" .
+ADD "https://github.com/llvm/llvm-project/releases/download/llvmorg-18.1.8/third-party-18.1.8.src.tar.xz" .
+ADD "https://github.com/llvm/llvm-project/releases/download/llvmorg-18.1.8/clang-tools-extra-18.1.8.src.tar.xz" .
+
+#
+# Unpack all & remove archives
+#
+RUN  mkdir -p /toolchain/src/src/llvm/{cmake,third-party,llvm-18.1.8.src/tools/clang/tools/extra} \
+    && tar -xvf llvm-18.1.8.src.tar.xz -C /toolchain/src/src/llvm \
+    && tar --strip-component=1 -xvf clang-18.1.8.src.tar.xz -C /toolchain/src/src/llvm/llvm-18.1.8.src/tools/clang \
+    && tar --strip-component=1 -xvf cmake-18.1.8.src.tar.xz -C /toolchain/src/src/llvm/cmake \
+    && tar --strip-component=1 -xvf third-party-18.1.8.src.tar.xz -C /toolchain/src/src/llvm/third-party \
+    && tar --strip-component=1 -xvf clang-tools-extra-18.1.8.src.tar.xz -C /toolchain/src/src/llvm/llvm-18.1.8.src/tools/clang/tools/extra \
+    && find /toolchain/src/src/archives/ -type f -delete
+
+
+WORKDIR /toolchain/src
+
+#
+# Build and remove src && configure
+#
+RUN /toolchain/src/build-linux-flipper-tools.sh llvm \
+    && . /toolchain/src/buildvars.sh \
+    && cleanup_after_build
