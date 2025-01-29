@@ -4,6 +4,9 @@ LINUX_BUILD_ROOT=/toolchain/linux-build-root
 LINUX_OUTPUT_ROOT=/toolchain/linux-output-root
 LINUX_CONFIGURE_ROOT=/toolchain/linux-configure-root
 
+NEWLIB_ROOT=/toolchain/newlib-root
+NEWLIB_NANO_ROOT=/toolchain/newlib-nano-root
+
 CMD=${1:-}
 
 CPUS=$(($(nproc) + 1))
@@ -18,6 +21,11 @@ function cleanup_relink() {
         -delete;
     rm -rf "$DIRECTORY/share/man"
     relink.sh "$DIRECTORY";
+}
+
+cmd() {
+    echo "[#] $*" >&2
+    "$@"
 }
 
 die() {

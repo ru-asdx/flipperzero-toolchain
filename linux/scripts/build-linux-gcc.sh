@@ -4,9 +4,6 @@ set -euo pipefail;
 
 . /toolchain/src/buildvars.sh
 
-NEWLIB_ROOT=/toolchain/newlib-root
-NEWLIB_NANO_ROOT=/toolchain/newlib-nano-root
-
 BUILD="${ARCH_BUILD}-linux-gnu";
 HOST="${ARCH_TARGET}-linux-gnu";
 

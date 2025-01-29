@@ -9,13 +9,13 @@ ARG BUILDPLATFORM
 
 RUN echo "Building on $BUILDPLATFORM, targeting $TARGETPLATFORM"
 
-WORKDIR /toolchain/src/src/archives
+WORKDIR /toolchain/src/archives
 
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN rm /bin/sh && ln -s /bin/bash /bin/sh \
     && apt update \
-    && apt -y install build-essential xz-utils m4 bison flex texinfo file patchelf rsync automake autoconf libtool python3 git pkg-config libudev-dev git wget git patch \
+    && apt -y --no-install-recommends install ca-certificates  build-essential xz-utils m4 bison flex texinfo file patchelf rsync automake autoconf libtool python3 git pkg-config libudev-dev git wget git patch \
     && apt-get -y clean \
     && rm -rf /tmp/* /var/tmp/*  /var/lib/apt/lists/*
 
@@ -31,29 +31,19 @@ RUN case ${TARGETPLATFORM} in \
          "linux/amd64")  ARCH=x86_64  ;; \
          "linux/arm64")  ARCH=aarch64  ;; \
     esac \
-    && echo "ARCH_TARGET=${ARCH}" >> /toolchain/src/buildvars.sh
-
-### src + build-deps
-
-RUN case ${TARGETPLATFORM} in \
-         "linux/amd64")  ARCH=x86_64  ;; \
-         "linux/arm64")  ARCH=aarch64  ;; \
-    esac \
+    && echo "ARCH_TARGET=${ARCH}" >> /toolchain/src/buildvars.sh \
+    && mkdir -p "/toolchain/src/src/" \
     && wget -q "https://github.com/Kitware/CMake/releases/download/v3.28.0/cmake-3.28.0-linux-${ARCH}.tar.gz" \
     && tar -xvf cmake-3.28.0-linux-${ARCH}.tar.gz -C /tmp \
     && rsync -azv /tmp/cmake-3.28.0-linux-${ARCH}/ /usr \
-    && rm cmake-3.28.0-linux-${ARCH}.tar.gz
-
-#
-# from src && deps
-# rm archives && build gcc-libs && build python-libs
-#
-RUN wget -q "https://developer.arm.com/-/media/Files/downloads/gnu/12.3.rel1/srcrel/arm-gnu-toolchain-src-snapshot-12.3.rel1.tar.xz" \
+    && rm cmake-3.28.0-linux-${ARCH}.tar.gz \
+&& echo "[#] from src && deps" \
+    && wget -q "https://developer.arm.com/-/media/Files/downloads/gnu/12.3.rel1/srcrel/arm-gnu-toolchain-src-snapshot-12.3.rel1.tar.xz" \
     && wget -q "https://ftp.gnu.org/pub/gnu/ncurses/ncurses-6.2.tar.gz" \
     && tar -xvf arm-gnu-toolchain-src-snapshot-12.3.rel1.tar.xz -C /toolchain/src/src/ \
     && rm -rf /toolchain/src/src/ncurses/* \
     && tar --strip-component=1 -xvf ncurses-6.2.tar.gz -C /toolchain/src/src/ncurses \
-    && find /toolchain/src/src/archives/ -type f -delete \
     && ln -s /toolchain/src/relink.sh /usr/local/bin/relink.sh \
-    && /toolchain/src/build-linux-gcc.sh gcc-libs \
-    && . /toolchain/src/buildvars.sh
+    && /toolchain/src/build-linux-gcc.sh gcc-libs  \
+&& echo "[#] cleanup ... " \
+    && rm -rf /toolchain/src/src/*
