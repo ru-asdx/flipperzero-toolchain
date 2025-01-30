@@ -115,12 +115,13 @@ jobs:
           uname -a || true
           sudo -n id || true
 
-          sudo python3 -m pip install --upgrade pip || true
-          sudo python3 -m pip install ./darwin/requirements.txt || true
-          
-          sudo ln -s ./darwin/chmocker /usr/local/bin/chmocker
+          python3 -m venv darwin/chmocker
+          source darwin/chmockerbin/activate 
 
-          /usr/local/bin/chmocker || true
+          python3 -m pip install --upgrade pip
+          python3 -m pip install ./darwin/requirements.txt
+          
+          ./darwin/chmocker 
           
           echo "...get chmocker..."
           echo "run it..."
