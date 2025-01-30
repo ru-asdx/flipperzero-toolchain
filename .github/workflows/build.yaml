@@ -117,14 +117,17 @@ jobs:
 
           pwd 
 
-          python3 -m venv .venv || true
-          source .venv/bin/activate || true
+          python3 -m venv .venv
+          source .venv/bin/activate
 
-          python3 -m pip install --upgrade pip || true
-          python3 -m pip install -r ./darwin/requirements.txt || true
+          python3 -m pip install --upgrade pip 
+          python3 -m pip install -r ./darwin/requirements.txt
           
-          sudo python3 ./darwin/chmocker  || true
-          ./darwin/chmocker || true
+          echo "[#] python ... "
+          sudo python3 ./darwin/chmocker
+
+          echo "[#] direct"
+          sudo ./darwin/chmocker
           
           echo "...get chmocker..."
           echo "run it..."
