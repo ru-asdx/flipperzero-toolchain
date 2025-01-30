@@ -115,9 +115,12 @@ jobs:
           uname -a || true
           sudo -n id || true
 
-          python3 -m pip install --upgrade pip || true
-          python3 -m pip install dockerfile-parse==2.0.1 || true
-          python3 -m pip install validators==0.22.0 || true
+          sudo python3 -m pip install --upgrade pip || true
+          sudo python3 -m pip install ./darwin/requirements.txt || true
+          
+          sudo ln -s ./darwin/chmocker /usr/loca/bin/chmocker
 
+          chmocker || true
+          
           echo "...get chmocker..."
           echo "run it..."
