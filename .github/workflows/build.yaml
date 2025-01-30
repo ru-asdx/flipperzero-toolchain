@@ -117,7 +117,7 @@ jobs:
 
           pwd 
 
-          sudo python3 -m venv .venv || true
+          python3 -m venv .venv || true
           source .venv/bin/activate || true
 
           python3 -m pip install --upgrade pip || true
