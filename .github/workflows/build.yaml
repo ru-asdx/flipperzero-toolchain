@@ -123,7 +123,10 @@ jobs:
           python3 -m pip install --upgrade pip 
           python3 -m pip install git+https://github.com/flipperdevices/chmocker.git
 
+          mkdir -p ~/.chmo/{images/images_mount}
+
           echo "[#] python ... "
-          sudo chmoker --help
+          sudo chmocker image create -t MacOSVenturaWithBrew || true
+          find ~/.chmo/
 
           echo "run it..."
