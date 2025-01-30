@@ -43,7 +43,7 @@ jobs:
         - {
             arch: arm64+amd64,
             os: darwin,
-            runner_os: macos-13-xlarge
+            runner_os: macos-13
           }
 
     env:
@@ -112,7 +112,8 @@ jobs:
           brew update || true
           df -h || true
           sw_vers || true 
-          
+          uname -a || true
+
           python3 -m pip install --upgrade pip || true
           python3 -m pip install dockerfile-parse==2.0.1 || true
           python3 -m pip install validators==0.22.0 || true
