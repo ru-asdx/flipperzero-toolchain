@@ -43,7 +43,7 @@ jobs:
         - {
             arch: arm64+amd64,
             os: darwin,
-            runner_os: macos-13
+            runner_os: macos-14
           }
 
     env:
