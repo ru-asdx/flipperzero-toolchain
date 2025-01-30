@@ -22,7 +22,7 @@ RUN . /toolchain/src/buildvars.sh \
     && tar --strip-component=1 -xf doxygen-1.12.0.src.tar.gz -C /toolchain/src/src/doxygen \
     && git clone https://github.com/flipperdevices/openocd.git /toolchain/src/src/openocd \
     && cd /toolchain/src/src/openocd \
-    && git reset --hard 2c984ce7ce8e0c88894d9e40924fe9bcc052878e \
+    && git reset --hard 4b909a31d34167f3ef03ff6f70e6d5b4caa7928a \
     && sed -i 's/https\:\/\/git.savannah.nongnu.org\/git\/git2cl.git/git:\/\/repo.or.cz\/git2cl.git/g' /toolchain/src/src/openocd/.gitmodules \
     && git submodule update --init --recursive \
     && find /toolchain/src/archives/ -type f -delete \
