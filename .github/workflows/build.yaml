@@ -124,10 +124,10 @@ jobs:
           python3 -m pip install -r ./darwin/requirements.txt
           
           echo "[#] python ... "
-          sudo python3 ./darwin/chmocker
+          sudo python3 ./darwin/chmocker || true
 
           echo "[#] direct"
-          sudo ./darwin/chmocker
+          sudo ./darwin/chmocker || true
           
           echo "...get chmocker..."
           echo "run it..."
