@@ -113,6 +113,7 @@ jobs:
           df -h || true
           sw_vers || true 
           uname -a || true
+          sudo -n id || true
 
           python3 -m pip install --upgrade pip || true
           python3 -m pip install dockerfile-parse==2.0.1 || true
