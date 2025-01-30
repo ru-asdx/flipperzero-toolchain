@@ -120,7 +120,7 @@ jobs:
           
           sudo ln -s ./darwin/chmocker /usr/local/bin/chmocker
 
-          chmocker || true
+          /usr/local/bin/chmocker || true
           
           echo "...get chmocker..."
           echo "run it..."
