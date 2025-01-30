@@ -17,29 +17,42 @@ permissions:
    contents: read
 
 jobs:
-  build-linux:
-    name: build toolchain for linux/${{ matrix.config.arch }}
+  build-toolchain:
+    name: build toolchain for ${{ matrix.config.os }}/${{ matrix.config.arch }}
     runs-on: ${{ matrix.config.runner_os }}
 
     strategy:
       fail-fast: false
       matrix:
         config:
+#        - {
+#            arch: arm64,
+#            os: linux,
+#            runner_os: ubuntu-24.04-arm
+#          }
+#        - {
+#            arch: amd64,
+#            os: linux,
+#            runner_os: ubuntu-24.04
+#          }
+#        - {
+#            arch: amd64,
+#            os: windows,
+#            runner_os: ubuntu-24.04
+#          }
         - {
-            arch: arm64,
-            runner_os:  ubuntu-24.04-arm
-          }
-        - {
-            arch: amd64,
-            runner_os: ubuntu-24.04
+            arch: arm64+amd64,
+            os: darwin,
+            runner_os: macos-13-xlarge
           }
 
     env:
-      IMAGE_NAME: flipperzero-toolchain-linux
+      IMAGE_NAME: flipperzero-toolchain-${{ matrix.config.os }}
       IMAGE_ARCH: ${{ matrix.config.arch }}
 
     steps:
       - name: free a little hdd space
+        if: startsWith(matrix.config.runner_os,'ubuntu-')
         run: |
           df -h
           sudo rm -rf /usr/local/share/chromium || true
@@ -72,20 +85,37 @@ jobs:
           echo "image_arch=${IMAGE_ARCH}" >> $GITHUB_OUTPUT
 
       - name: setup docker buildx
+        if: startsWith(matrix.config.runner_os,'ubuntu-')
         uses: docker/setup-buildx-action@v3
 
       - name: merge dockerfiles
+        if: startsWith(matrix.config.runner_os,'ubuntu-')
         run: |
-          cat ./linux/Dockerfile.* > ./linux/Dockerfile
+          cat ./${{ matrix.config.os }}/Dockerfile.* > ./${{ matrix.config.os }}/Dockerfile
 
       - name: build and export base_build image
+        if: startsWith(matrix.config.runner_os,'ubuntu-')
         id: docker_build
         uses: docker/build-push-action@v6
         with:
-          file: ./linux/Dockerfile
-          context: ./linux/
+          file: ./${{ matrix.config.os }}/Dockerfile
+          context: ./${{ matrix.config.os }}/
           tags: ${{ steps.meta.outputs.image_name }}:${{ steps.meta.outputs.image_tag }}
           load: true
           outputs: type=docker,dest=${{ runner.temp }}/${{ steps.meta.outputs.image_name }}_${{ steps.meta.outputs.image_tag }}_${{ steps.meta.outputs.image_arch }}.tar
           cache-from: type=gha,scope=${{ steps.meta.outputs.image_name }}_${{ steps.meta.outputs.image_tag }}_${{ steps.meta.outputs.image_arch }}
           cache-to: type=gha,mode=max,scope=${{ steps.meta.outputs.image_name }}_${{ steps.meta.outputs.image_tag }}_${{ steps.meta.outputs.image_arch }}
+
+      - name: build it
+        if: startsWith(matrix.config.runner_os,'macos-')
+        run: |
+          brew update || true
+          df -h || true
+          sw_vers || true 
+          
+          python3 -m pip install --upgrade pip || true
+          python3 -m pip install dockerfile-parse==2.0.1 || true
+          python3 -m pip install validators==0.22.0 || true
+
+          echo "...get chmocker..."
+          echo "run it..."
