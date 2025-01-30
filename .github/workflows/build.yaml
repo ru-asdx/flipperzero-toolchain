@@ -123,7 +123,8 @@ jobs:
           python3 -m pip install --upgrade pip || true
           python3 -m pip install -r ./darwin/requirements.txt || true
           
-          python3 ./darwin/chmocker 
-
+          sudo python3 ./darwin/chmocker  || true
+          ./darwin/chmocker || true
+          
           echo "...get chmocker..."
           echo "run it..."
