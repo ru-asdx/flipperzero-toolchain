@@ -1,0 +1,2 @@
+FROM flipperzero-toolchain-mac-build-base AS flipperzero-toolchain-mac-binutils
+RUN bash /toolchain/src/build-mac-binutils.sh
