@@ -1,3 +1,0 @@
-dockerfile-parse==2.0.1
-validators==0.22.0
-termcolor==2.4.0
