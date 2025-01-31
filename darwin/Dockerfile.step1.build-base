@@ -2,7 +2,7 @@ FROM MacOSVenturaWithBrew AS flipperzero-toolchain-mac-build-base
 
 
 RUN brew update-reset
-RUN brew install gettext texinfo coreutils bison flex m4 xz
+RUN brew install gettext texinfo coreutils bison flex m4 xz || true
 RUN brew link bison --force
 
 RUN whereis xz \
