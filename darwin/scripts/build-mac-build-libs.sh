@@ -276,13 +276,15 @@ function build_libexpat_arm64() {
     popd;
 }
 
-build_gmp_x86_64;
 build_gmp_arm64;
-build_mpfr_x86_64;
 build_mpfr_arm64;
-build_mpc_x86_64;
 build_mpc_arm64;
-build_isl_x86_64;
 build_isl_arm64;
-build_libexpat_x86_64;
 build_libexpat_arm64;
+
+build_gmp_x86_64;
+build_mpfr_x86_64;
+build_mpc_x86_64;
+build_isl_x86_64;
+build_libexpat_x86_64;
+
