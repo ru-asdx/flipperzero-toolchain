@@ -25,21 +25,21 @@ jobs:
       fail-fast: false
       matrix:
         config:
-        - {
-            arch: arm64,
-            os: linux,
-            runner_os: ubuntu-24.04-arm
-          }
-        - {
-            arch: amd64,
-            os: linux,
-            runner_os: ubuntu-24.04
-          }
-        - {
-            arch: amd64,
-            os: windows,
-            runner_os: ubuntu-24.04
-          }
+#        - {
+#            arch: arm64,
+#            os: linux,
+#            runner_os: ubuntu-24.04-arm
+#          }
+#        - {
+#            arch: amd64,
+#            os: linux,
+#            runner_os: ubuntu-24.04
+#          }
+#        - {
+#            arch: amd64,
+#            os: windows,
+#            runner_os: ubuntu-24.04
+#          }
         - {
             arch: arm64+amd64,
             os: darwin,
