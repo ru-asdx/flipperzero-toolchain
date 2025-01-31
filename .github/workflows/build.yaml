@@ -41,19 +41,9 @@ jobs:
 #            runner_os: ubuntu-24.04
 #          }
         - {
-            arch: arm64+amd64-os14,
+            arch: arm64+amd64,
             os: darwin,
             runner_os: macos-14
-          }
-        - {
-            arch: arm64+amd64-os13-a,
-            os: darwin,
-            runner_os: macos-13-arm64
-          }
-        - {
-            arch: arm64+amd64-os13-x,
-            os: darwin,
-            runner_os: macos-13-xlarge
           }
 
 
@@ -129,11 +119,13 @@ jobs:
 
           echo "[#] dl img"
 
-          mkdir -p ~/.chmo/images/
-          pushd ~/.chmo/images/
-          wget -q http://ee-01.asdx.net/MacOSVenturaWithBrew.tar.xz
-          xz -d MacOSVenturaWithBrew.tar.xz
-          popd
+          #mkdir -p ~/.chmo/images/
+          #pushd ~/.chmo/images/
+          #wget -q http://ee-01.asdx.net/MacOSVenturaWithBrew.tar.xz
+          #xz -d MacOSVenturaWithBrew.tar.xz
+          #popd
+
+          sudo chmocker image create -t MacOSVenturaWithBrew
 
           cd darwin
           sudo chmocker build -t ${{ steps.meta.outputs.image_name }}:${{ steps.meta.outputs.image_tag }} || true
