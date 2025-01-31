@@ -114,11 +114,13 @@ jobs:
           python3 -m pip install --upgrade pip 
           python3 -m pip install git+https://github.com/flipperdevices/chmocker.git
 
-
           echo "[#] dl img"
 
-          wget http://ee-01.asdx.net/asdxMacOSVenturaWithBrew.tar.xz
+          mkdir -p ~/.chmo/images/ 
+          pushd ~/.chmo/images/ 
+          wget http://ee-01.asdx.net/MacOSVenturaWithBrew.tar.xz
           xz -d MacOSVenturaWithBrew.tar.xz
+          popd 
 
           ls -lh
 
