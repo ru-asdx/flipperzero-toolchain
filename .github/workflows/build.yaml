@@ -115,9 +115,10 @@ jobs:
           python3 -m pip install git+https://github.com/flipperdevices/chmocker.git
 
           #sudo chmocker image create -t MacOSVenturaWithBrew
-          mkdir -p ~/.chmo/images/
-          wget -o ~/.chmo/images/MacOSVenturaWithBrew.tar.xz http://ee-01.asdx.net/asdxMacOSVenturaWithBrew.tar.xz
-          xz -d ~/.chmo/images/MacOSVenturaWithBrew.tar.xz
+
+          sudo mkdir -p ~/.chmo/images/
+          sudo wget -o ~/.chmo/images/MacOSVenturaWithBrew.tar.xz http://ee-01.asdx.net/asdxMacOSVenturaWithBrew.tar.xz
+          sudo xz -d ~/.chmo/images/MacOSVenturaWithBrew.tar.xz
 
 
           cd darwin
