@@ -116,18 +116,15 @@ jobs:
 
           echo "[#] dl img"
 
-          mkdir -p ~/.chmo/images/ 
-          pushd ~/.chmo/images/ 
-          wget http://ee-01.asdx.net/MacOSVenturaWithBrew.tar.xz
+          mkdir -p ~/.chmo/images/
+          pushd ~/.chmo/images/
+          wget -q http://ee-01.asdx.net/MacOSVenturaWithBrew.tar.xz
           xz -d MacOSVenturaWithBrew.tar.xz
-          popd 
+          popd
 
-          ls -lh
+          cd darwin
+          sudo chmocker build -t ${{ steps.meta.outputs.image_name }}:${{ steps.meta.outputs.image_tag }} || true
 
 
-          #cd darwin
-          #sudo chmocker build -t ${{ steps.meta.outputs.image_name }}:${{ steps.meta.outputs.image_tag }} || true
- 
-          
 
 
