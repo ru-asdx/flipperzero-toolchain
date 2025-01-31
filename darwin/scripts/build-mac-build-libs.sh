@@ -4,8 +4,10 @@ set -euo pipefail;
 
 MAC_X86_64_CONFIGURE_ROOT=/toolchain/mac-x86_64-configure-root
 MAC_ARM64_CONFIGURE_ROOT=/toolchain/mac-arm64-configure-root
+
 MAC_X86_64_BUILD_ROOT=/toolchain/mac-x86_64-build-root
 MAC_ARM64_BUILD_ROOT=/toolchain/mac-arm64-build-root
+
 MAC_X86_64_OUTPUT_ROOT=/toolchain/mac-x86_64-output-root
 MAC_ARM64_OUTPUT_ROOT=/toolchain/mac-arm64-output-root
 
@@ -276,15 +278,16 @@ function build_libexpat_arm64() {
     popd;
 }
 
+
+build_gmp_x86_64;
+build_mpfr_x86_64;
+build_mpc_x86_64;
+build_isl_x86_64;
+build_libexpat_x86_64;
+
 build_gmp_arm64;
 build_mpfr_arm64;
 build_mpc_arm64;
 build_isl_arm64;
 build_libexpat_arm64;
-
-#build_gmp_x86_64;
-#build_mpfr_x86_64;
-#build_mpc_x86_64;
-#build_isl_x86_64;
-#build_libexpat_x86_64;
 

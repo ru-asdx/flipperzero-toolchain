@@ -45,7 +45,11 @@ jobs:
             os: darwin,
             runner_os: macos-14
           }
-
+        - {
+            arch: arm64+amd64,
+            os: darwin,
+            runner_os: macos-13
+          }
 
     env:
       IMAGE_NAME: flipperzero-toolchain-${{ matrix.config.os }}
