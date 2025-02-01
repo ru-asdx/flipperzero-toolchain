@@ -84,5 +84,5 @@ function build_binutils_arm64() {
     popd;
 }
 
-build_binutils_x86_64;
+#build_binutils_x86_64;
 build_binutils_arm64;

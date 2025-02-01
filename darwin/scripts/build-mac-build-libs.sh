@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 set -euo pipefail;
 
@@ -15,6 +15,11 @@ MAC_X86_64_FLAGS="-mmacosx-version-min=11.3 -arch x86_64"
 MAC_ARM64_FLAGS="-mmacosx-version-min=11.3 -arch arm64"
 
 CPUS="$(sysctl -n hw.ncpu)";
+
+echo "[#] SET1"
+set
+echo "[#] ENDSET1"
+
 
 function build_gmp_x86_64() {
     mkdir -p "$MAC_X86_64_CONFIGURE_ROOT/gmp";
@@ -173,6 +178,14 @@ function build_mpc_arm64() {
 }
 
 function build_isl_x86_64() {
+
+    echo "[#] SET2"
+    set
+
+    find /toolchain/
+
+    echo "[#] ENDSET2"
+
     mkdir -p "$MAC_X86_64_CONFIGURE_ROOT/isl";
     pushd "$MAC_X86_64_CONFIGURE_ROOT/isl";
     CPPFLAGS="$MAC_X86_64_FLAGS" \
